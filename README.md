@@ -1,73 +1,85 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# NestJS Chat Docs
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This is a microservice based on redis, rabbitmq and nestjs.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+### Required Softwares:
 
-## Description
+ - Docker
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Operating System:
 
-## Installation
+  - Linux (preferred)
+  - Windows (not tested)
+ ### Run Instructions:
+ Grab .env file from the developer and run using these commands:
+ 
 
-```bash
-$ yarn install
-```
+    sudo docker compose -f docker-compose.yml up --build
 
-## Running the app
+# API Requests Docs
+All of the requests and their docs can be found at:
+[Authentication Docs](http://localhost:4000/api-docs)
+You need to save all the data from login response and send them as JSON.stringify as authorization header.
+example: 
 
-```bash
-# development
-$ yarn run start
+    authorization: '{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxLCJmaXJzdE5hbWUiOiJKb2huIiwibGFzdE5hbWUiOiJEb2UiLCJlbWFpbCI6InRlc3RAbWFpbC5jb20ifSwiaWF0IjoxNzAzNDAzMzc0LCJleHAiOjE3MDM0MDY5NzR9.01G-luWKyYnZCr99eSTUIuExfe_DnBy5PfNBOY5i-Vg","user":{"id":1,"firstName":"John","lastName":"Doe","email":"test@mail.com"}}'
 
-# watch mode
-$ yarn run start:dev
 
-# production mode
-$ yarn run start:prod
-```
 
-## Test
+### Websocket Docs:
 
-```bash
-# unit tests
-$ yarn run test
+**Presence:**
+url: http://localhost:6000
+connection example:
 
-# e2e tests
-$ yarn run test:e2e
+    const presenceBaseUrl = 'http://localhost:6000';
+    const presenceSocket = SocketIoClient(presenceBaseUrl, {
+    	transportOptions: {
+    			polling: {
+	    			extraHeaders: {
+		    			Authorization: jwtToken,
+		    		},
+	    		},
+	    	},
+	    }
+	 )
 
-# test coverage
-$ yarn run test:cov
-```
 
-## Support
+events:
+ - friendActive  -  Get Active friends
+ - updateActiveStatus  - Update User Active Status
+ example:
+`presenceSocket.emit('updateActiveStatus', true)`
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+**Message**
+url: http://localhost:7000
+connection example:
 
-## Stay in touch
+    const chatBaseUrl = 'http://localhost:7000';
+    const chatSocket = SocketIoClient(presenceBaseUrl, {
+    	transportOptions: {
+    			polling: {
+        			extraHeaders: {
+    	    			Authorization: jwtToken,
+    	    		},
+        		},
+        	},
+        }
+     )
+events:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+ - getAllConversations - Get All Conversations with other users
+ - newMessage - Get New Message from other users
+ - sendMessage - Sends New Message to other users
+ body params:
 
-## License
-
-Nest is [MIT licensed](LICENSE).
+     `message: string,
+     friendId: int,
+     conversationId: int`
+example:
+`chatSocket.emit('sendMessage', {
+      message: "Hi",
+      friendId: 1,
+      conversationId: 5,
+    });`
+ - ping - Check if Websocket is alive or not
